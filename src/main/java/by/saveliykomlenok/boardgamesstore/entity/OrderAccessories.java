@@ -20,8 +20,8 @@ public class OrderAccessories {
     private int amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accessory")
-    private BoardGame boardGame;
+    @JoinColumn(name = "accessory_obj")
+    private Accessory accessory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order")

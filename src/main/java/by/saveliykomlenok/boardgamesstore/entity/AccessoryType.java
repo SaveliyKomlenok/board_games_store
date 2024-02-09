@@ -21,6 +21,6 @@ public class AccessoryType {
 
     private String name;
 
-    @OneToMany(mappedBy = "accessory")
+    @OneToMany(mappedBy = "accessoryType")
     private List<Accessory> accessories;
 }
