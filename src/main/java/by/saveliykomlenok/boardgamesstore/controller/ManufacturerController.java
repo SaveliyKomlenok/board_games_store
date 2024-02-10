@@ -1,14 +1,10 @@
 package by.saveliykomlenok.boardgamesstore.controller;
 
-import by.saveliykomlenok.boardgamesstore.dto.BoardGameCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.dto.ManufacturerCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.ManufacturerReadDto;
 import by.saveliykomlenok.boardgamesstore.service.ManufacturerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 

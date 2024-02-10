@@ -27,20 +27,20 @@ public class BoardGameService {
 
     public List<BoardGameReadDto> findAll() {
         return boardGameRepository.findAll().stream()
-                .map(entity -> mapper.map(entity, BoardGameReadDto.class))
+                .map(boardGame -> mapper.map(boardGame, BoardGameReadDto.class))
                 .toList();
     }
 
     public BoardGameReadDto findById(Long id) {
         return boardGameRepository.findById(id)
-                .map(entity -> mapper.map(entity, BoardGameReadDto.class))
+                .map(boardGame -> mapper.map(boardGame, BoardGameReadDto.class))
                 .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Transactional
     public BoardGameReadDto create(BoardGameCreateEditDto boardDto) {
         BoardGame boardGame = Optional.of(boardDto)
-                .map(entity -> mapper.map(entity, BoardGame.class)).orElseThrow();
+                .map(boardGameCreateEditDto -> mapper.map(boardGameCreateEditDto, BoardGame.class)).orElseThrow();
         boardGame.setManufacturer(mapper.map(manufacturerService.findById(boardDto.getManufacturer()), Manufacturer.class));
         boardGame.setBoardGamesType(mapper.map(boardGameTypeService.findById(boardDto.getBoardGameType()), BoardGameType.class));
 
@@ -67,8 +67,8 @@ public class BoardGameService {
     @Transactional
     public void delete(Long id) {
         boardGameRepository.findById(id)
-                .map(entity -> {
-                    boardGameRepository.delete(entity);
+                .map(boardGame -> {
+                    boardGameRepository.delete(boardGame);
                     boardGameRepository.flush();
                     return true;
                 }).orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND));

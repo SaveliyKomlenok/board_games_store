@@ -20,7 +20,7 @@ public class CartAccessories {
     private int amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accessory_obj")
+    @JoinColumn(name = "accessory")
     private Accessory accessory;
 
     @ManyToOne(fetch = FetchType.LAZY)

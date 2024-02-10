@@ -4,9 +4,7 @@ import by.saveliykomlenok.boardgamesstore.dto.BoardGameCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.service.BoardGameService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
