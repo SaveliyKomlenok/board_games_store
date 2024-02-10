@@ -23,8 +23,7 @@ public class BoardGameController {
 
     @GetMapping("/{id}")
     public BoardGameReadDto findById(@PathVariable("id") Long id){
-        return boardGameService.findById(id)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return boardGameService.findById(id);
     }
 
     @PostMapping
@@ -34,14 +33,11 @@ public class BoardGameController {
 
     @PutMapping("/{id}")
     public BoardGameReadDto update(@PathVariable("id") Long id, @RequestBody BoardGameCreateEditDto boardGame){
-        return boardGameService.update(id, boardGame)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return boardGameService.update(id, boardGame);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id){
-        if(!boardGameService.delete(id)){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        boardGameService.delete(id);
     }
 }
