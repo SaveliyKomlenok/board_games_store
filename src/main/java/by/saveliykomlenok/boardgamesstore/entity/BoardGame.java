@@ -33,7 +33,7 @@ public class BoardGame {
     @JoinColumn(name = "manufacturer")
     private Manufacturer manufacturer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "type")
     private BoardGameType boardGamesType;
 

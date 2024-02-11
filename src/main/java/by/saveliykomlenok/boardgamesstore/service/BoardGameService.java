@@ -1,7 +1,7 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
-import by.saveliykomlenok.boardgamesstore.dto.BoardGameCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.BoardGameReadDto;
+import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameCreateEditDto;
+import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.BoardGame;
 import by.saveliykomlenok.boardgamesstore.entity.BoardGameType;
 import by.saveliykomlenok.boardgamesstore.entity.Manufacturer;
@@ -40,7 +40,8 @@ public class BoardGameService {
     @Transactional
     public BoardGameReadDto create(BoardGameCreateEditDto boardDto) {
         BoardGame boardGame = Optional.of(boardDto)
-                .map(boardGameCreateEditDto -> mapper.map(boardGameCreateEditDto, BoardGame.class)).orElseThrow();
+                .map(boardGameCreateEditDto -> mapper.map(boardGameCreateEditDto, BoardGame.class))
+                .orElseThrow();
         boardGame.setManufacturer(mapper.map(manufacturerService.findById(boardDto.getManufacturer()), Manufacturer.class));
         boardGame.setBoardGamesType(mapper.map(boardGameTypeService.findById(boardDto.getBoardGameType()), BoardGameType.class));
 

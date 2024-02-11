@@ -1,7 +1,7 @@
 package by.saveliykomlenok.boardgamesstore.controller;
 
-import by.saveliykomlenok.boardgamesstore.dto.ManufacturerCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.ManufacturerReadDto;
+import by.saveliykomlenok.boardgamesstore.dto.manufacturer.ManufacturerCreateEditDto;
+import by.saveliykomlenok.boardgamesstore.dto.manufacturer.ManufacturerReadDto;
 import by.saveliykomlenok.boardgamesstore.service.ManufacturerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

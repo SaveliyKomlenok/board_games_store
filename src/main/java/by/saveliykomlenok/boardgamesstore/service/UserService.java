@@ -1,12 +1,8 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
-import by.saveliykomlenok.boardgamesstore.dto.AccessoryTypeCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.AccessoryTypeReadDto;
-import by.saveliykomlenok.boardgamesstore.dto.UserCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.UserReadDto;
-import by.saveliykomlenok.boardgamesstore.entity.AccessoryType;
+import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
+import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.User;
-import by.saveliykomlenok.boardgamesstore.repositories.AccessoryTypeRepository;
 import by.saveliykomlenok.boardgamesstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

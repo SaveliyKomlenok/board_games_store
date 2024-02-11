@@ -24,6 +24,6 @@ public class CartBoardGames {
     private BoardGame boardGame;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_obj")
     private User user;
 }

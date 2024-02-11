@@ -1,4 +1,4 @@
-package by.saveliykomlenok.boardgamesstore.dto;
+package by.saveliykomlenok.boardgamesstore.dto.accessory;
 
 import lombok.Data;
 

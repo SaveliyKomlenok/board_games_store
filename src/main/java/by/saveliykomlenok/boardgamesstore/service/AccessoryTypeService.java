@@ -1,7 +1,7 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
-import by.saveliykomlenok.boardgamesstore.dto.AccessoryTypeCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.AccessoryTypeReadDto;
+import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeCreateEditDto;
+import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.AccessoryType;
 import by.saveliykomlenok.boardgamesstore.repositories.AccessoryTypeRepository;
 import lombok.RequiredArgsConstructor;
