@@ -3,7 +3,7 @@ package by.saveliykomlenok.boardgamesstore.service;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.User;
-import by.saveliykomlenok.boardgamesstore.repositories.UserRepository;
+import by.saveliykomlenok.boardgamesstore.repositoriy.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;

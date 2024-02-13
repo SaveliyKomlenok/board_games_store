@@ -1,4 +1,4 @@
-package by.saveliykomlenok.boardgamesstore.repositories;
+package by.saveliykomlenok.boardgamesstore.repositoriy;
 
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

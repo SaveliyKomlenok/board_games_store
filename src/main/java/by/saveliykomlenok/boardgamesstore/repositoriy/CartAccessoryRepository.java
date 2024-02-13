@@ -1,4 +1,4 @@
-package by.saveliykomlenok.boardgamesstore.repositories;
+package by.saveliykomlenok.boardgamesstore.repositoriy;
 
 import by.saveliykomlenok.boardgamesstore.entity.CartAccessories;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +13,6 @@ public interface CartAccessoryRepository extends JpaRepository<CartAccessories, 
     boolean existsCartAccessoriesByAccessoryIdAndUserId(Long accessoryId, Long userId);
 
     CartAccessories findCartAccessoriesByAccessoryIdAndUserId(Long accessoryId, Long userId);
+
+    void deleteAllByUserId(Long id);
 }

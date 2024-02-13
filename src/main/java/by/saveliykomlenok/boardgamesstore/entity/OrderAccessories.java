@@ -19,11 +19,11 @@ public class OrderAccessories {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "accessory")
     private Accessory accessory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order")
+    @ManyToOne
+    @JoinColumn(name = "order_obj")
     private MainOrder mainOrder;
 }

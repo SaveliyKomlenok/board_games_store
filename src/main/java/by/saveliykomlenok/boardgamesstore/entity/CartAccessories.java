@@ -19,11 +19,11 @@ public class CartAccessories {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "accessory")
     private Accessory accessory;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user")
+    @ManyToOne
+    @JoinColumn(name = "user_obj")
     private User user;
 }

@@ -16,7 +16,7 @@ public class CardBoardGameController {
 
     @GetMapping
     public List<CartBoardGameReadDto> findAll(){
-        return cartBoardGameService.findAll(null);
+        return cartBoardGameService.findAll(4L);
     }
 
     @GetMapping("/{id}")

@@ -3,7 +3,7 @@ package by.saveliykomlenok.boardgamesstore.service;
 import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.AccessoryType;
-import by.saveliykomlenok.boardgamesstore.repositories.AccessoryTypeRepository;
+import by.saveliykomlenok.boardgamesstore.repositoriy.AccessoryTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;

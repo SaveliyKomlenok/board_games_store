@@ -1,8 +1,10 @@
 package by.saveliykomlenok.boardgamesstore.dto.boardgame;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class BoardGameCreateEditDto {
     private String name;
     private double price;

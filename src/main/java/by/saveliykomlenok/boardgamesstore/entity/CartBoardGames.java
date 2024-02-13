@@ -19,11 +19,11 @@ public class CartBoardGames {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "board_game")
     private BoardGame boardGame;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_obj")
     private User user;
 }

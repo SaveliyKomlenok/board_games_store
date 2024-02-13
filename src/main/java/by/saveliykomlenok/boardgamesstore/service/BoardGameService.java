@@ -5,7 +5,7 @@ import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.BoardGame;
 import by.saveliykomlenok.boardgamesstore.entity.BoardGameType;
 import by.saveliykomlenok.boardgamesstore.entity.Manufacturer;
-import by.saveliykomlenok.boardgamesstore.repositories.BoardGameRepository;
+import by.saveliykomlenok.boardgamesstore.repositoriy.BoardGameRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;

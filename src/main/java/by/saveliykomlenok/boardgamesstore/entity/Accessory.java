@@ -25,11 +25,11 @@ public class Accessory {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "manufacturer")
     private Manufacturer manufacturer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "type")
     private AccessoryType accessoryType;
 

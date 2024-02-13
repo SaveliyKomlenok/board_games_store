@@ -16,7 +16,7 @@ public class CartAccessoryController {
 
     @GetMapping
     public List<CartAccessoryReadDto> findAll(){
-        return cartAccessoryService.findAll(null);
+        return cartAccessoryService.findAll(4L);
     }
 
     @GetMapping("/{id}")

@@ -24,13 +24,13 @@ public class MainOrder {
 
     private String address;
 
-    @OneToMany(mappedBy = "mainOrder")
+    @OneToMany(mappedBy = "mainOrder", cascade = CascadeType.REMOVE)
     private List<OrderBoardGames> orderBoardGames;
 
-    @OneToMany(mappedBy = "mainOrder")
+    @OneToMany(mappedBy = "mainOrder", cascade = CascadeType.REMOVE)
     private List<OrderAccessories> orderAccessories;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user")
+    @ManyToOne
+    @JoinColumn(name = "user_obj")
     private User user;
 }

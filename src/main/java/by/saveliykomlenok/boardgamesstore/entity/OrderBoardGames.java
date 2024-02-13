@@ -19,11 +19,11 @@ public class OrderBoardGames {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "board_game")
     private BoardGame boardGame;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order")
+    @ManyToOne
+    @JoinColumn(name = "order_obj")
     private MainOrder mainOrder;
 }

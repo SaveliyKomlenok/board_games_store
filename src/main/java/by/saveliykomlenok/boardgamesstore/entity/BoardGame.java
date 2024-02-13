@@ -29,7 +29,7 @@ public class BoardGame {
 
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "manufacturer")
     private Manufacturer manufacturer;
 
