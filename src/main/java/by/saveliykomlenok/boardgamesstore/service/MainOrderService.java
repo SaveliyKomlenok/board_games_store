@@ -9,6 +9,7 @@ import by.saveliykomlenok.boardgamesstore.dto.order.OrderBoardGameCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.entity.MainOrder;
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.MainOrderRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.order.OrderMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -43,14 +44,14 @@ public class MainOrderService {
     public MainOrderReadDto findById(Long id) {
         return mainOrderRepository.findById(id)
                 .map(mainOrder -> mapper.map(mainOrder, MainOrderReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new OrderMissingException("Order doesn't exist"));
     }
 
     @Transactional
     public MainOrderReadDto create(User user, MainOrderCreateEditDto mainOrderDto) {
         MainOrder mainOrder = Optional.of(mainOrderDto)
                 .map(mainOrderCreateEditDto -> mapper.map(mainOrderDto, MainOrder.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
 
         mainOrder.setUser(mapper.map(userService.findById(mainOrderDto.getUser()), User.class));
 //        mainOrder.setUser(user);
@@ -89,13 +90,13 @@ public class MainOrderService {
 
     @Transactional
     public void delete(Long id) {
-        orderBoardGameService.deleteOrderByMainOrderId(id);
-        orderAccessoryService.deleteOrderByMainOrderId(id);
         mainOrderRepository.findById(id)
                 .map(mainOrder -> {
+                    orderBoardGameService.deleteOrderByMainOrderId(id);
+                    orderAccessoryService.deleteOrderByMainOrderId(id);
                     mainOrderRepository.delete(mainOrder);
                     mainOrderRepository.flush();
                     return true;
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                }).orElseThrow(() -> new OrderMissingException("Order doesn't exist"));
     }
 }

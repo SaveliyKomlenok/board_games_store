@@ -4,6 +4,8 @@ import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeCreateEditD
 import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryTypeReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.AccessoryType;
 import by.saveliykomlenok.boardgamesstore.repositoriy.AccessoryTypeRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.accessory.AccessoryTypeIsExistsException;
+import by.saveliykomlenok.boardgamesstore.util.exception.accessory.AccessoryTypeMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -30,26 +32,44 @@ public class AccessoryTypeService {
     public AccessoryTypeReadDto findById(Long id) {
         return accessoryTypeRepository.findById(id)
                 .map(accessoryType -> mapper.map(accessoryType, AccessoryTypeReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AccessoryTypeMissingException("Accessory type doesn't exist"));
     }
 
     @Transactional
     public AccessoryTypeReadDto create(AccessoryTypeCreateEditDto accessoryTypeDto) {
-        return Optional.of(accessoryTypeDto)
+        AccessoryType accessoryType = Optional.of(accessoryTypeDto)
                 .map(accessoryTypeCreateEditDto -> mapper.map(accessoryTypeDto, AccessoryType.class))
-                .map(accessoryTypeRepository::save)
-                .map(accessoryType -> mapper.map(accessoryType, AccessoryTypeReadDto.class))
-                .orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        if (validateCreateUpdate(accessoryTypeDto)) {
+            throw new AccessoryTypeIsExistsException("Accessory type is already exists");
+        }
+        accessoryTypeRepository.save(accessoryType);
+        return mapper.map(accessoryType, AccessoryTypeReadDto.class);
     }
+
 
     @Transactional
     public AccessoryTypeReadDto update(Long id, AccessoryTypeCreateEditDto accessoryTypeDto) {
         AccessoryType accessoryType = accessoryTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AccessoryTypeMissingException("Accessory type doesn't exist"));
+        if (validateCreateUpdate(id, accessoryTypeDto)) {
+            throw new AccessoryTypeIsExistsException("Accessory type is already exists");
+        }
         mapper.map(accessoryTypeDto, accessoryType);
         accessoryTypeRepository.saveAndFlush(accessoryType);
         return mapper.map(accessoryType, AccessoryTypeReadDto.class);
     }
+
+    private boolean validateCreateUpdate(Long id, AccessoryTypeCreateEditDto accessoryTypeDto) {
+        Optional<AccessoryType> tempAccessoryType = accessoryTypeRepository.findAccessoryTypeByName(accessoryTypeDto.getName());
+        return tempAccessoryType.isPresent() && !tempAccessoryType.get().getId().equals(id);
+    }
+
+    private boolean validateCreateUpdate(AccessoryTypeCreateEditDto accessoryTypeDto) {
+        Optional<AccessoryType> tempAccessoryType = accessoryTypeRepository.findAccessoryTypeByName(accessoryTypeDto.getName());
+        return tempAccessoryType.isPresent();
+    }
+
 
     @Transactional
     public void delete(Long id) {
@@ -59,6 +79,6 @@ public class AccessoryTypeService {
                     accessoryTypeRepository.flush();
                     return true;
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AccessoryTypeMissingException("Accessory type doesn't exist"));
     }
 }

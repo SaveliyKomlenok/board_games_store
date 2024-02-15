@@ -4,6 +4,7 @@ import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.UserRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.user.UserMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class UserService {
     public UserReadDto findById(Long id) {
         return userRepository.findById(id)
                 .map(user -> mapper.map(user, UserReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserMissingException("User doesn't exist"));
     }
 
     @Transactional
@@ -39,13 +40,13 @@ public class UserService {
                 .map(userCreateEditDto -> mapper.map(userDto, User.class))
                 .map(userRepository::save)
                 .map(user -> mapper.map(user, UserReadDto.class))
-                .orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
     }
 
     @Transactional
     public UserReadDto update(Long id, UserCreateEditDto userDto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserMissingException("User doesn't exist"));
         mapper.map(userDto, user);
         userRepository.saveAndFlush(user);
         return mapper.map(user, UserReadDto.class);
@@ -59,6 +60,6 @@ public class UserService {
                     userRepository.flush();
                     return true;
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UserMissingException("User doesn't exist"));
     }
 }

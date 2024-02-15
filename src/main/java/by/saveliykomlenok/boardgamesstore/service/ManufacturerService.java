@@ -4,6 +4,8 @@ import by.saveliykomlenok.boardgamesstore.dto.manufacturer.ManufacturerCreateEdi
 import by.saveliykomlenok.boardgamesstore.dto.manufacturer.ManufacturerReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.Manufacturer;
 import by.saveliykomlenok.boardgamesstore.repositoriy.ManufacturerRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.manufacturer.ManufacturerIsExistsException;
+import by.saveliykomlenok.boardgamesstore.util.exception.manufacturer.ManufacturerMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -30,26 +32,43 @@ public class ManufacturerService {
     public ManufacturerReadDto findById(Long id) {
         return manufacturerRepository.findById(id)
                 .map(manufacturer -> mapper.map(manufacturer, ManufacturerReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ManufacturerMissingException("Manufacturer doesn't exist"));
     }
 
     @Transactional
     public ManufacturerReadDto create(ManufacturerCreateEditDto manufacturerDto) {
-        return Optional.of(manufacturerDto)
+        Manufacturer manufacturer = Optional.of(manufacturerDto)
                 .map(manufacturerCreateEditDto -> mapper.map(manufacturerDto, Manufacturer.class))
-                .map(manufacturerRepository::save)
-                .map(manufacturer -> mapper.map(manufacturer, ManufacturerReadDto.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+
+        if(validateCreateUpdate(manufacturerDto)){
+            throw new ManufacturerIsExistsException("Manufacturer is already exist");
+        }
+        manufacturerRepository.save(manufacturer);
+        return mapper.map(manufacturer, ManufacturerReadDto.class);
     }
 
     @Transactional
     public ManufacturerReadDto update(Long id, ManufacturerCreateEditDto manufacturerDto) {
         Manufacturer manufacturer = manufacturerRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ManufacturerMissingException("Manufacturer doesn't exist"));
+
+        if(validateCreateUpdate(id, manufacturerDto)){
+            throw new ManufacturerIsExistsException("Manufacturer is already exist");
+        }
         mapper.map(manufacturerDto, manufacturer);
         manufacturerRepository.saveAndFlush(manufacturer);
         return mapper.map(manufacturer, ManufacturerReadDto.class);
+    }
 
+    private boolean validateCreateUpdate(Long id, ManufacturerCreateEditDto manufacturerDto){
+        Optional<Manufacturer> tempManufacturer = manufacturerRepository.findManufacturerByName(manufacturerDto.getName());
+        return tempManufacturer.isPresent() && !tempManufacturer.get().getId().equals(id);
+    }
+
+    private boolean validateCreateUpdate(ManufacturerCreateEditDto manufacturerDto){
+        Optional<Manufacturer> tempManufacturer = manufacturerRepository.findManufacturerByName(manufacturerDto.getName());
+        return tempManufacturer.isPresent();
     }
 
     @Transactional
@@ -59,6 +78,6 @@ public class ManufacturerService {
                     manufacturerRepository.delete(manufacturer);
                     manufacturerRepository.flush();
                     return true;
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                }).orElseThrow(() -> new ManufacturerMissingException("Manufacturer doesn't exist"));
     }
 }

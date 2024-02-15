@@ -1,13 +1,11 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
 import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.order.OrderAccessoryCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.order.OrderAccessoryReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.Accessory;
 import by.saveliykomlenok.boardgamesstore.entity.MainOrder;
 import by.saveliykomlenok.boardgamesstore.entity.OrderAccessories;
-import by.saveliykomlenok.boardgamesstore.entity.OrderBoardGames;
 import by.saveliykomlenok.boardgamesstore.repositoriy.OrderAccessoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -37,7 +35,7 @@ public class OrderAccessoryService {
     public OrderAccessoryReadDto create(MainOrder mainOrder, OrderAccessoryCreateEditDto orderAccessoryDto) {
         OrderAccessories orderAccessories = Optional.of(orderAccessoryDto)
                 .map(orderAccessoryCreateEditDto -> mapper.map(orderAccessoryDto, OrderAccessories.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
 
         orderAccessories.setAccessory(mapper.map(accessoryService.findById(orderAccessoryDto.getAccessory()), Accessory.class));
         orderAccessories.setMainOrder(mainOrder);
@@ -55,11 +53,19 @@ public class OrderAccessoryService {
     private void rollbackAmountOfAccessory(Long id) {
         for (OrderAccessories orderAccessories
                 : orderAccessoryRepository.findOrderAccessoriesByMainOrderId(id)) {
-            amountRollback(orderAccessories);
+            amountRollback(orderAccessories.getAccessory(), orderAccessories.getAmount());
         }
     }
 
-    private void amountRollback(OrderAccessories orderAccessories) {
-        CartAccessoryService.rollback(orderAccessories.getAccessory(), orderAccessories.getAmount(), accessoryService);
+    private void amountRollback(Accessory accessory, int amount) {
+        System.err.println(amount);
+        AccessoryCreateEditDto accessoryCreateEditDto = AccessoryCreateEditDto.builder()
+                .name(accessory.getName())
+                .price(accessory.getPrice())
+                .amount(accessory.getAmount() + amount)
+                .manufacturer(accessory.getManufacturer().getId())
+                .accessoryType(accessory.getAccessoryType().getId())
+                .build();
+        accessoryService.update(accessory.getId(), accessoryCreateEditDto);
     }
 }

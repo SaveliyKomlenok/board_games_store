@@ -1,6 +1,5 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
-import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.dto.cart.CartBoardGameCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.cart.CartBoardGameReadDto;
@@ -8,6 +7,8 @@ import by.saveliykomlenok.boardgamesstore.entity.BoardGame;
 import by.saveliykomlenok.boardgamesstore.entity.CartBoardGames;
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.CartBoardGameRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.boardgame.AmountOfBoardGameExceededException;
+import by.saveliykomlenok.boardgamesstore.util.exception.cart.CartBoardGameMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -39,14 +40,14 @@ public class CartBoardGameService{
     public CartBoardGameReadDto findById(Long id) {
         return cartBoardGameRepository.findById(id)
                 .map(cartBoardGames -> mapper.map(cartBoardGames, CartBoardGameReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartBoardGameMissingException("Cart board game doesn't exist"));
     }
 
     @Transactional
     public CartBoardGameReadDto create(User user, CartBoardGameCreateEditDto cartBoardGameDto) {
         CartBoardGames cartBoardGames = Optional.of(cartBoardGameDto)
                 .map(cartBoardGameCreateEditDto -> mapper.map(cartBoardGameDto, CartBoardGames.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
         if (cartBoardGameRepository.existsCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), cartBoardGameDto.getUser())) {
             cartBoardGames = cartBoardGameRepository.findCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), cartBoardGameDto.getUser());
             cartBoardGames.setAmount(cartBoardGames.getAmount() + cartBoardGameDto.getAmount());
@@ -54,9 +55,9 @@ public class CartBoardGameService{
 
         BoardGameReadDto boardGameReadDto = boardGameService.findById(cartBoardGameDto.getBoardGame());
 
-        if (isEnoughAmount(boardGameReadDto, cartBoardGameDto)) {
-            boardGameReadDto = removeAmountOfBoardGame(cartBoardGameDto, boardGameReadDto);
-        } else throw new ResponseStatusException(HttpStatus.CONFLICT);
+        if (!isEnoughAmount(boardGameReadDto, cartBoardGames)) {
+            throw new AmountOfBoardGameExceededException("Amount of board game to purchase has been exceeded");
+        }
 
         cartBoardGames.setBoardGame(mapper.map(boardGameReadDto, BoardGame.class));
         cartBoardGames.setUser(mapper.map(userService.findById(cartBoardGameDto.getUser()), User.class));
@@ -66,27 +67,14 @@ public class CartBoardGameService{
         return mapper.map(cartBoardGames, CartBoardGameReadDto.class);
     }
 
-    private BoardGameReadDto removeAmountOfBoardGame(CartBoardGameCreateEditDto cartBoardGameCreateEditDto, BoardGameReadDto boardGameReadDto) {
-        BoardGameCreateEditDto boardGameCreateEditDto = BoardGameCreateEditDto.builder()
-                .name(boardGameReadDto.getName())
-                .price(boardGameReadDto.getPrice())
-                .numberOfPlayers(boardGameReadDto.getNumberOfPlayers())
-                .age(boardGameReadDto.getAge())
-                .amount(boardGameReadDto.getAmount() - cartBoardGameCreateEditDto.getAmount())
-                .manufacturer(boardGameReadDto.getManufacturer().getId())
-                .boardGameType(boardGameReadDto.getBoardGameType().getId())
-                .build();
-        return boardGameService.update(boardGameReadDto.getId(), boardGameCreateEditDto);
-    }
-
-    public boolean isEnoughAmount(BoardGameReadDto boardGameReadDto, CartBoardGameCreateEditDto cartBoardGameDto) {
-        return (boardGameReadDto.getAmount() - cartBoardGameDto.getAmount()) >= 0;
+    public boolean isEnoughAmount(BoardGameReadDto boardGameReadDto, CartBoardGames cartBoardGames) {
+        return cartBoardGames.getAmount() <= boardGameReadDto.getAmount();
     }
 
     @Transactional
     public CartBoardGameReadDto update(Long id, CartBoardGameCreateEditDto cartBoardGameDto) {
         CartBoardGames cartBoardGames = cartBoardGameRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartBoardGameMissingException("Cart board game doesn't exist"));
 
         mapper.map(cartBoardGameDto, cartBoardGames);
 
@@ -99,36 +87,12 @@ public class CartBoardGameService{
 
     @Transactional
     public void delete(Long id) {
-        rollbackAmountOfBoardGames(id);
         cartBoardGameRepository.findById(id)
                 .map(cartBoardGames -> {
                     cartBoardGameRepository.delete(cartBoardGames);
                     cartBoardGameRepository.flush();
                     return true;
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    private void rollbackAmountOfBoardGames(Long id) {
-        CartBoardGames cartBoardGames = cartBoardGameRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        amountRollback(cartBoardGames);
-    }
-
-    public void amountRollback(CartBoardGames cartBoardGames) {
-        rollback(cartBoardGames.getBoardGame(), cartBoardGames.getAmount(), boardGameService);
-    }
-
-    static void rollback(BoardGame boardGame, int amount, BoardGameService boardGameService) {
-        BoardGameCreateEditDto boardGameCreateEditDto = BoardGameCreateEditDto.builder()
-                .name(boardGame.getName())
-                .price(boardGame.getPrice())
-                .numberOfPlayers(boardGame.getNumberOfPlayers())
-                .age(boardGame.getAge())
-                .amount(boardGame.getAmount() + amount)
-                .manufacturer(boardGame.getManufacturer().getId())
-                .boardGameType(boardGame.getBoardGamesType().getId())
-                .build();
-        boardGameService.update(boardGame.getId(), boardGameCreateEditDto);
+                }).orElseThrow(() -> new CartBoardGameMissingException("Cart board game doesn't exist"));
     }
 
     @Transactional

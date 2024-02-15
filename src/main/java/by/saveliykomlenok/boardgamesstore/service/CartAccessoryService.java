@@ -1,14 +1,14 @@
 package by.saveliykomlenok.boardgamesstore.service;
 
-import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryReadDto;
-import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameReadDto;
 import by.saveliykomlenok.boardgamesstore.dto.cart.CartAccessoryCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.cart.CartAccessoryReadDto;
-import by.saveliykomlenok.boardgamesstore.dto.cart.CartBoardGameCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.entity.*;
+import by.saveliykomlenok.boardgamesstore.entity.Accessory;
+import by.saveliykomlenok.boardgamesstore.entity.CartAccessories;
+import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.CartAccessoryRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.accessory.AmountOfAccessoryExceededException;
+import by.saveliykomlenok.boardgamesstore.util.exception.cart.CartAccessoryMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -40,14 +40,14 @@ public class CartAccessoryService {
     public CartAccessoryReadDto findById(Long id) {
         return cartAccessoryRepository.findById(id)
                 .map(cartAccessories -> mapper.map(cartAccessories, CartAccessoryReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartAccessoryMissingException("Card accessory doesn't exist"));
     }
 
     @Transactional
     public CartAccessoryReadDto create(User user, CartAccessoryCreateEditDto cartAccessoryDto) {
         CartAccessories cartAccessories = Optional.of(cartAccessoryDto)
                 .map(cartAccessoryCreateEditDto -> mapper.map(cartAccessoryDto, CartAccessories.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
         if (cartAccessoryRepository.existsCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), cartAccessoryDto.getUser())) {
             cartAccessories = cartAccessoryRepository.findCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), cartAccessoryDto.getUser());
             cartAccessories.setAmount(cartAccessories.getAmount() + cartAccessoryDto.getAmount());
@@ -55,37 +55,26 @@ public class CartAccessoryService {
 
         AccessoryReadDto accessoryReadDto = accessoryService.findById(cartAccessoryDto.getAccessory());
 
-        if (isEnoughAmount(accessoryReadDto, cartAccessoryDto)) {
-            accessoryReadDto = removeAmountOfAccessory(cartAccessoryDto, accessoryReadDto);
-        } else throw new ResponseStatusException(HttpStatus.CONFLICT);
+        if (!isEnoughAmount(accessoryReadDto, cartAccessories)) {
+            throw new AmountOfAccessoryExceededException("Amount of accessory to purchase has been exceeded");
+        }
 
         cartAccessories.setAccessory(mapper.map(accessoryReadDto, Accessory.class));
         cartAccessories.setUser(mapper.map(userService.findById(cartAccessoryDto.getUser()), User.class));
-        //cartBoardGames.setUser(user); Реализовать после JWT
+        //cartAccessories.setUser(user); Реализовать после JWT
 
         cartAccessoryRepository.saveAndFlush(cartAccessories);
         return mapper.map(cartAccessories, CartAccessoryReadDto.class);
     }
 
-    private AccessoryReadDto removeAmountOfAccessory(CartAccessoryCreateEditDto cartAccessoryCreateEditDto, AccessoryReadDto accessoryReadDto) {
-        AccessoryCreateEditDto accessoryCreateEditDto = AccessoryCreateEditDto.builder()
-                .name(accessoryReadDto.getName())
-                .price(accessoryReadDto.getPrice())
-                .amount(accessoryReadDto.getAmount() - cartAccessoryCreateEditDto.getAmount())
-                .manufacturer(accessoryReadDto.getManufacturer().getId())
-                .accessoryType(accessoryReadDto.getAccessoryType().getId())
-                .build();
-        return accessoryService.update(accessoryReadDto.getId(), accessoryCreateEditDto);
-    }
-
-    public boolean isEnoughAmount(AccessoryReadDto accessoryReadDto, CartAccessoryCreateEditDto cartAccessoryDto) {
-        return (accessoryReadDto.getAmount() - cartAccessoryDto.getAmount()) >= 0;
+    public boolean isEnoughAmount(AccessoryReadDto accessoryReadDto, CartAccessories cartAccessories) {
+        return cartAccessories.getAmount() <= accessoryReadDto.getAmount();
     }
 
     @Transactional
     public CartAccessoryReadDto update(Long id, CartAccessoryCreateEditDto cartAccessoryDto) {
         CartAccessories cartAccessories = cartAccessoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartAccessoryMissingException("Card accessory doesn't exist"));
 
         mapper.map(cartAccessoryDto, cartAccessories);
 
@@ -99,34 +88,12 @@ public class CartAccessoryService {
 
     @Transactional
     public void delete(Long id) {
-        rollbackAmountOfAccessory(id);
         cartAccessoryRepository.findById(id)
                 .map(cartAccessories -> {
                     cartAccessoryRepository.delete(cartAccessories);
                     cartAccessoryRepository.flush();
                     return true;
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }
-
-    private void rollbackAmountOfAccessory(Long id) {
-        CartAccessories cartAccessories = cartAccessoryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        amountRollback(cartAccessories);
-    }
-
-    public void amountRollback(CartAccessories cartAccessories) {
-        rollback(cartAccessories.getAccessory(), cartAccessories.getAmount(),  accessoryService);
-    }
-
-    static void rollback(Accessory accessory, int amount, AccessoryService accessoryService) {
-        AccessoryCreateEditDto accessoryCreateEditDto = AccessoryCreateEditDto.builder()
-                .name(accessory.getName())
-                .price(accessory.getPrice())
-                .amount(accessory.getAmount() + amount)
-                .manufacturer(accessory.getManufacturer().getId())
-                .accessoryType(accessory.getAccessoryType().getId())
-                .build();
-        accessoryService.update(accessory.getId(), accessoryCreateEditDto);
+                }).orElseThrow(() -> new CartAccessoryMissingException("Card accessory doesn't exist"));
     }
 
     @Transactional

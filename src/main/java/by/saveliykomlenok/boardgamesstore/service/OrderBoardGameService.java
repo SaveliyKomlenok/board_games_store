@@ -9,8 +9,10 @@ import by.saveliykomlenok.boardgamesstore.entity.OrderBoardGames;
 import by.saveliykomlenok.boardgamesstore.repositoriy.OrderBoardGameRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +35,7 @@ public class OrderBoardGameService {
     public OrderBoardGameReadDto create(MainOrder mainOrder, OrderBoardGameCreateEditDto orderBoardGameDto) {
         OrderBoardGames orderBoardGames = Optional.of(orderBoardGameDto)
                 .map(orderBoardGameCreateEditDto -> mapper.map(orderBoardGameDto, OrderBoardGames.class))
-                .orElseThrow();
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
 
         orderBoardGames.setBoardGame(mapper.map(boardGameService.findById(orderBoardGameDto.getBoardGame()), BoardGame.class));
         orderBoardGames.setMainOrder(mainOrder);
@@ -52,11 +54,20 @@ public class OrderBoardGameService {
     private void rollbackAmountOfBoardGame(Long id) {
         for (OrderBoardGames orderBoardGames
                 : orderBoardGameRepository.findOrderBoardGamesByMainOrderId(id)) {
-            amountRollback(orderBoardGames);
+            amountRollback(orderBoardGames.getBoardGame(), orderBoardGames.getAmount());
         }
     }
 
-    private void amountRollback(OrderBoardGames orderBoardGames) {
-        CartBoardGameService.rollback(orderBoardGames.getBoardGame(), orderBoardGames.getAmount(), boardGameService);
+    private void amountRollback(BoardGame boardGame, int amount) {
+        BoardGameCreateEditDto boardGameCreateEditDto = BoardGameCreateEditDto.builder()
+                .name(boardGame.getName())
+                .price(boardGame.getPrice())
+                .numberOfPlayers(boardGame.getNumberOfPlayers())
+                .age(boardGame.getAge())
+                .amount(boardGame.getAmount() + amount)
+                .manufacturer(boardGame.getManufacturer().getId())
+                .boardGameType(boardGame.getBoardGamesType().getId())
+                .build();
+        boardGameService.update(boardGame.getId(), boardGameCreateEditDto);
     }
 }

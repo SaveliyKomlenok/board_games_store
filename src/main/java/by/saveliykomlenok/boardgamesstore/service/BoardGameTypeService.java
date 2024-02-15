@@ -4,6 +4,8 @@ import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameTypeCreateEditD
 import by.saveliykomlenok.boardgamesstore.dto.boardgame.BoardGameTypeReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.BoardGameType;
 import by.saveliykomlenok.boardgamesstore.repositoriy.BoardGameTypeRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.boardgame.BoardGameTypeMissingException;
+import by.saveliykomlenok.boardgamesstore.util.exception.boardgame.BoardTypeIsExistsException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -30,25 +32,41 @@ public class BoardGameTypeService {
     public BoardGameTypeReadDto findById(Long id) {
         return boardGameTypeRepository.findById(id)
                 .map(boardGameType -> mapper.map(boardGameType, BoardGameTypeReadDto.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BoardGameTypeMissingException("Board game type doesn't exist"));
     }
 
     @Transactional
     public BoardGameTypeReadDto create(BoardGameTypeCreateEditDto boardGameTypeDto) {
-        return Optional.of(boardGameTypeDto)
+        BoardGameType boardGameType = Optional.of(boardGameTypeDto)
                 .map(boardGameTypeCreateEditDto -> mapper.map(boardGameTypeDto, BoardGameType.class))
-                .map(boardGameTypeRepository::save)
-                .map(boardGameType -> mapper.map(boardGameType, BoardGameTypeReadDto.class))
-                .orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        if (validateCreateUpdate(boardGameTypeDto)) {
+            throw new BoardTypeIsExistsException("Board game type is already exists");
+        }
+        boardGameTypeRepository.save(boardGameType);
+        return mapper.map(boardGameType, BoardGameTypeReadDto.class);
     }
 
     @Transactional
     public BoardGameTypeReadDto update(Long id, BoardGameTypeCreateEditDto boardGameTypeDto) {
         BoardGameType boardGameType = boardGameTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BoardGameTypeMissingException("Board game type doesn't exist"));
+        if (validateCreateUpdate(id, boardGameTypeDto)) {
+            throw new BoardTypeIsExistsException("Board game type is already exists");
+        }
         mapper.map(boardGameTypeDto, boardGameType);
         boardGameTypeRepository.saveAndFlush(boardGameType);
         return mapper.map(boardGameType, BoardGameTypeReadDto.class);
+    }
+
+    private boolean validateCreateUpdate(Long id, BoardGameTypeCreateEditDto boardGameTypeDto) {
+        Optional<BoardGameType> tempBoardGameType = boardGameTypeRepository.findBoardGameTypeByName(boardGameTypeDto.getName());
+        return tempBoardGameType.isPresent() && !tempBoardGameType.get().getId().equals(id);
+    }
+
+    private boolean validateCreateUpdate(BoardGameTypeCreateEditDto boardGameTypeDto) {
+        Optional<BoardGameType> tempBoardGameType = boardGameTypeRepository.findBoardGameTypeByName(boardGameTypeDto.getName());
+        return tempBoardGameType.isPresent();
     }
 
     @Transactional
@@ -59,6 +77,6 @@ public class BoardGameTypeService {
                     boardGameTypeRepository.flush();
                     return true;
                 })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BoardGameTypeMissingException("Board game type doesn't exist"));
     }
 }
