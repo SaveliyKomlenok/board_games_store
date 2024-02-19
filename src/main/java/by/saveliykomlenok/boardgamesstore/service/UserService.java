@@ -2,12 +2,14 @@ package by.saveliykomlenok.boardgamesstore.service;
 
 import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
+import by.saveliykomlenok.boardgamesstore.entity.Role;
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.UserRepository;
 import by.saveliykomlenok.boardgamesstore.util.exception.user.UserMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserReadDto> findAll() {
         return userRepository.findAll().stream()
@@ -34,13 +37,20 @@ public class UserService {
                 .orElseThrow(() -> new UserMissingException("User doesn't exist"));
     }
 
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserMissingException("User doesn't exist"));
+    }
+
     @Transactional
-    public UserReadDto create(UserCreateEditDto userDto) {
-        return Optional.of(userDto)
+    public User create(UserCreateEditDto userDto){
+        User user = Optional.of(userDto)
                 .map(userCreateEditDto -> mapper.map(userDto, User.class))
-                .map(userRepository::save)
-                .map(user -> mapper.map(user, UserReadDto.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+        System.err.println(user.getCreatedAt());
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setRole(Role.USER);
+        return userRepository.save(user);
     }
 
     @Transactional

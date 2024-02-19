@@ -9,5 +9,4 @@ class BoardGamesStoreApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }
