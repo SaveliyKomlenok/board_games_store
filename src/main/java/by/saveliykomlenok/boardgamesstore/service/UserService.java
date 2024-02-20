@@ -5,6 +5,7 @@ import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.entity.Role;
 import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.repositoriy.UserRepository;
+import by.saveliykomlenok.boardgamesstore.util.exception.user.UserIsExistsException;
 import by.saveliykomlenok.boardgamesstore.util.exception.user.UserMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -46,7 +47,10 @@ public class UserService {
     public User create(UserCreateEditDto userDto){
         User user = Optional.of(userDto)
                 .map(userCreateEditDto -> mapper.map(userDto, User.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+                .orElseThrow();
+        if(userRepository.findByUsername(userDto.getUsername()).isPresent()){
+            throw new UserIsExistsException("Username is already exist");
+        }
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRole(Role.USER);
         return userRepository.save(user);

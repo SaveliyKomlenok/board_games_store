@@ -1,5 +1,7 @@
 package by.saveliykomlenok.boardgamesstore.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@SecurityScheme(type = SecuritySchemeType.HTTP, name = "BearerAuth", scheme = "bearer")
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -21,7 +24,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorizeReq -> authorizeReq.requestMatchers("/auth/**",
+                .authorizeHttpRequests(authorizeReq -> authorizeReq.requestMatchers(
+                        "/auth/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "v3/api-docs/**")

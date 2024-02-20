@@ -3,10 +3,9 @@ package by.saveliykomlenok.boardgamesstore.controller;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.service.UserService;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,11 +17,13 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
+    @PreAuthorize("hasAnyAuthority('admin:read')")
     @GetMapping
     public List<UserReadDto> findAll(){
         return userService.findAll();
     }
 
+    @PreAuthorize("hasAnyAuthority('admin:read')")
     @GetMapping("/{id}")
     public UserReadDto findById(@PathVariable("id") Long id){
         return userService.findById(id);
@@ -33,6 +34,7 @@ public class UserController {
         return userService.update(id, userDto);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin:delete')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") Long id){
         userService.delete(id);

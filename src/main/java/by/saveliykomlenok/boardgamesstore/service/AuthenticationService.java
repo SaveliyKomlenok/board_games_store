@@ -3,8 +3,6 @@ package by.saveliykomlenok.boardgamesstore.service;
 import by.saveliykomlenok.boardgamesstore.dto.auth.AuthenticationDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserAuthorizeDto;
 import by.saveliykomlenok.boardgamesstore.dto.user.UserCreateEditDto;
-import by.saveliykomlenok.boardgamesstore.service.JwtService;
-import by.saveliykomlenok.boardgamesstore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
