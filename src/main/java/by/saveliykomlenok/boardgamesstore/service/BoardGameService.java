@@ -10,10 +10,8 @@ import by.saveliykomlenok.boardgamesstore.util.exception.boardgame.BoardGameIsEx
 import by.saveliykomlenok.boardgamesstore.util.exception.boardgame.BoardGameMissingException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +41,7 @@ public class BoardGameService {
     public BoardGameReadDto create(BoardGameCreateEditDto boardDto) {
         BoardGame boardGame = Optional.of(boardDto)
                 .map(boardGameCreateEditDto -> mapper.map(boardGameCreateEditDto, BoardGame.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+                .orElseThrow();
         boardGame.setManufacturer(mapper.map(manufacturerService.findById(boardDto.getManufacturer()), Manufacturer.class));
         boardGame.setBoardGamesType(mapper.map(boardGameTypeService.findById(boardDto.getBoardGameType()), BoardGameType.class));
 
@@ -51,7 +49,7 @@ public class BoardGameService {
             throw new BoardGameIsExistsException("Board game is already exists");
         }
 
-        return mapper.map(boardGame, BoardGameReadDto.class);
+        return mapper.map(boardGameRepository.save(boardGame), BoardGameReadDto.class);
     }
 
     @Transactional
@@ -68,9 +66,7 @@ public class BoardGameService {
         boardGame.setManufacturer(mapper.map(manufacturerService.findById(boardDto.getManufacturer()), Manufacturer.class));
         boardGame.setBoardGamesType(mapper.map(boardGameTypeService.findById(boardDto.getBoardGameType()), BoardGameType.class));
 
-        boardGameRepository.saveAndFlush(boardGame);
-
-        return mapper.map(boardGame, BoardGameReadDto.class);
+        return mapper.map(boardGameRepository.saveAndFlush(boardGame), BoardGameReadDto.class);
     }
 
     private boolean validateCreateUpdate(Long id, BoardGameCreateEditDto boardGameDto){

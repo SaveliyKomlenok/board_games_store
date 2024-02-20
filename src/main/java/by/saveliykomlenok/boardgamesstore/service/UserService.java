@@ -47,7 +47,6 @@ public class UserService {
         User user = Optional.of(userDto)
                 .map(userCreateEditDto -> mapper.map(userDto, User.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        System.err.println(user.getCreatedAt());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRole(Role.USER);
         return userRepository.save(user);
@@ -65,8 +64,8 @@ public class UserService {
     @Transactional
     public void delete(Long id) {
         userRepository.findById(id)
-                .map(entity -> {
-                    userRepository.delete(entity);
+                .map(user -> {
+                    userRepository.delete(user);
                     userRepository.flush();
                     return true;
                 })

@@ -13,6 +13,8 @@ import by.saveliykomlenok.boardgamesstore.util.exception.order.OrderMissingExcep
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -51,8 +53,7 @@ public class MainOrderService {
     public MainOrderReadDto create(User user, MainOrderCreateEditDto mainOrderDto) {
         MainOrder mainOrder = Optional.of(mainOrderDto)
                 .map(mainOrderCreateEditDto -> mapper.map(mainOrderDto, MainOrder.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-
+                .orElseThrow();
         mainOrder.setUser(mapper.map(userService.findById(mainOrderDto.getUser()), User.class));
 //        mainOrder.setUser(user);
 

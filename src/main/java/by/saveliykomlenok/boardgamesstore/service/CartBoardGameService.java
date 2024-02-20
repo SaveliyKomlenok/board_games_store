@@ -63,8 +63,7 @@ public class CartBoardGameService{
         cartBoardGames.setUser(mapper.map(userService.findById(cartBoardGameDto.getUser()), User.class));
         //cartBoardGames.setUser(user); Реализовать после JWT
 
-        cartBoardGameRepository.saveAndFlush(cartBoardGames);
-        return mapper.map(cartBoardGames, CartBoardGameReadDto.class);
+        return mapper.map(cartBoardGameRepository.saveAndFlush(cartBoardGames), CartBoardGameReadDto.class);
     }
 
     public boolean isEnoughAmount(BoardGameReadDto boardGameReadDto, CartBoardGames cartBoardGames) {
@@ -81,8 +80,7 @@ public class CartBoardGameService{
         cartBoardGames.setBoardGame(mapper.map(boardGameService.findById(cartBoardGameDto.getBoardGame()), BoardGame.class));
         cartBoardGames.setUser(mapper.map(userService.findById(cartBoardGameDto.getUser()), User.class));
 
-        cartBoardGameRepository.saveAndFlush(cartBoardGames);
-        return mapper.map(cartBoardGames, CartBoardGameReadDto.class);
+        return mapper.map(cartBoardGameRepository.saveAndFlush(cartBoardGames), CartBoardGameReadDto.class);
     }
 
     @Transactional

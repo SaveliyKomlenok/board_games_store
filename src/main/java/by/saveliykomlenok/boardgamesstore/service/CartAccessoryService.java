@@ -63,8 +63,7 @@ public class CartAccessoryService {
         cartAccessories.setUser(mapper.map(userService.findById(cartAccessoryDto.getUser()), User.class));
         //cartAccessories.setUser(user); Реализовать после JWT
 
-        cartAccessoryRepository.saveAndFlush(cartAccessories);
-        return mapper.map(cartAccessories, CartAccessoryReadDto.class);
+        return mapper.map( cartAccessoryRepository.saveAndFlush(cartAccessories), CartAccessoryReadDto.class);
     }
 
     public boolean isEnoughAmount(AccessoryReadDto accessoryReadDto, CartAccessories cartAccessories) {
@@ -81,9 +80,7 @@ public class CartAccessoryService {
         cartAccessories.setAccessory(mapper.map(accessoryService.findById(cartAccessoryDto.getAccessory()), Accessory.class));
         cartAccessories.setUser(mapper.map(userService.findById(cartAccessoryDto.getUser()), User.class));
 
-        cartAccessoryRepository.saveAndFlush(cartAccessories);
-
-        return mapper.map(cartAccessories, CartAccessoryReadDto.class);
+        return mapper.map(cartAccessoryRepository.saveAndFlush(cartAccessories), CartAccessoryReadDto.class);
     }
 
     @Transactional

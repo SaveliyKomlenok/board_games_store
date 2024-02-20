@@ -40,9 +40,7 @@ public class OrderBoardGameService {
         orderBoardGames.setBoardGame(mapper.map(boardGameService.findById(orderBoardGameDto.getBoardGame()), BoardGame.class));
         orderBoardGames.setMainOrder(mainOrder);
 
-        orderBoardGameRepository.save(orderBoardGames);
-
-        return mapper.map(orderBoardGames, OrderBoardGameReadDto.class);
+        return mapper.map(orderBoardGameRepository.save(orderBoardGames), OrderBoardGameReadDto.class);
     }
 
     @Transactional

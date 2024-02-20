@@ -44,8 +44,8 @@ public class ManufacturerService {
         if(validateCreateUpdate(manufacturerDto)){
             throw new ManufacturerIsExistsException("Manufacturer is already exist");
         }
-        manufacturerRepository.save(manufacturer);
-        return mapper.map(manufacturer, ManufacturerReadDto.class);
+
+        return mapper.map(manufacturerRepository.save(manufacturer), ManufacturerReadDto.class);
     }
 
     @Transactional
@@ -57,8 +57,8 @@ public class ManufacturerService {
             throw new ManufacturerIsExistsException("Manufacturer is already exist");
         }
         mapper.map(manufacturerDto, manufacturer);
-        manufacturerRepository.saveAndFlush(manufacturer);
-        return mapper.map(manufacturer, ManufacturerReadDto.class);
+
+        return mapper.map(manufacturerRepository.saveAndFlush(manufacturer), ManufacturerReadDto.class);
     }
 
     private boolean validateCreateUpdate(Long id, ManufacturerCreateEditDto manufacturerDto){

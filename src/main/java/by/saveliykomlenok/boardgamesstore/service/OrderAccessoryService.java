@@ -39,9 +39,8 @@ public class OrderAccessoryService {
 
         orderAccessories.setAccessory(mapper.map(accessoryService.findById(orderAccessoryDto.getAccessory()), Accessory.class));
         orderAccessories.setMainOrder(mainOrder);
-        orderAccessoryRepository.save(orderAccessories);
 
-        return mapper.map(orderAccessories, OrderAccessoryReadDto.class);
+        return mapper.map(orderAccessoryRepository.save(orderAccessories), OrderAccessoryReadDto.class);
     }
 
     @Transactional

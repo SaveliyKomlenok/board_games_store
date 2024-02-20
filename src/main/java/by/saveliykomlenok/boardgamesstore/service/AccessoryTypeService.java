@@ -39,12 +39,12 @@ public class AccessoryTypeService {
     public AccessoryTypeReadDto create(AccessoryTypeCreateEditDto accessoryTypeDto) {
         AccessoryType accessoryType = Optional.of(accessoryTypeDto)
                 .map(accessoryTypeCreateEditDto -> mapper.map(accessoryTypeDto, AccessoryType.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+                .orElseThrow();
         if (validateCreateUpdate(accessoryTypeDto)) {
             throw new AccessoryTypeIsExistsException("Accessory type is already exists");
         }
-        accessoryTypeRepository.save(accessoryType);
-        return mapper.map(accessoryType, AccessoryTypeReadDto.class);
+
+        return mapper.map(accessoryTypeRepository.save(accessoryType), AccessoryTypeReadDto.class);
     }
 
 
@@ -56,8 +56,8 @@ public class AccessoryTypeService {
             throw new AccessoryTypeIsExistsException("Accessory type is already exists");
         }
         mapper.map(accessoryTypeDto, accessoryType);
-        accessoryTypeRepository.saveAndFlush(accessoryType);
-        return mapper.map(accessoryType, AccessoryTypeReadDto.class);
+
+        return mapper.map(accessoryTypeRepository.saveAndFlush(accessoryType), AccessoryTypeReadDto.class);
     }
 
     private boolean validateCreateUpdate(Long id, AccessoryTypeCreateEditDto accessoryTypeDto) {
@@ -69,7 +69,6 @@ public class AccessoryTypeService {
         Optional<AccessoryType> tempAccessoryType = accessoryTypeRepository.findAccessoryTypeByName(accessoryTypeDto.getName());
         return tempAccessoryType.isPresent();
     }
-
 
     @Transactional
     public void delete(Long id) {

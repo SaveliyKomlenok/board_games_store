@@ -43,15 +43,15 @@ public class AccessoryService {
     public AccessoryReadDto create(AccessoryCreateEditDto accessoryDto) {
         Accessory accessory = Optional.of(accessoryDto)
                 .map(entity -> mapper.map(entity, Accessory.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+                .orElseThrow();
         accessory.setManufacturer(mapper.map(manufacturerService.findById(accessoryDto.getManufacturer()), Manufacturer.class));
         accessory.setAccessoryType(mapper.map(accessoryTypeService.findById(accessoryDto.getAccessoryType()), AccessoryType.class));
 
         if (validateCreateUpdate(accessoryDto)){
             throw new AccessoryIsExistsException("Accessory is already exists");
         }
-        accessoryRepository.save(accessory);
-        return mapper.map(accessory, AccessoryReadDto.class);
+
+        return mapper.map(accessoryRepository.save(accessory), AccessoryReadDto.class);
     }
 
     @Transactional
@@ -67,8 +67,8 @@ public class AccessoryService {
 
         accessory.setManufacturer(mapper.map(manufacturerService.findById(accessoryDto.getManufacturer()), Manufacturer.class));
         accessory.setAccessoryType(mapper.map(accessoryTypeService.findById(accessoryDto.getAccessoryType()), AccessoryType.class));
-        accessoryRepository.saveAndFlush(accessory);
-        return mapper.map(accessory, AccessoryReadDto.class);
+
+        return mapper.map(accessoryRepository.saveAndFlush(accessory), AccessoryReadDto.class);
     }
 
     private boolean validateCreateUpdate(Long id, AccessoryCreateEditDto accessoryDto){

@@ -39,12 +39,12 @@ public class BoardGameTypeService {
     public BoardGameTypeReadDto create(BoardGameTypeCreateEditDto boardGameTypeDto) {
         BoardGameType boardGameType = Optional.of(boardGameTypeDto)
                 .map(boardGameTypeCreateEditDto -> mapper.map(boardGameTypeDto, BoardGameType.class))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
+                .orElseThrow();
         if (validateCreateUpdate(boardGameTypeDto)) {
             throw new BoardTypeIsExistsException("Board game type is already exists");
         }
-        boardGameTypeRepository.save(boardGameType);
-        return mapper.map(boardGameType, BoardGameTypeReadDto.class);
+
+        return mapper.map(boardGameTypeRepository.save(boardGameType), BoardGameTypeReadDto.class);
     }
 
     @Transactional
@@ -55,8 +55,8 @@ public class BoardGameTypeService {
             throw new BoardTypeIsExistsException("Board game type is already exists");
         }
         mapper.map(boardGameTypeDto, boardGameType);
-        boardGameTypeRepository.saveAndFlush(boardGameType);
-        return mapper.map(boardGameType, BoardGameTypeReadDto.class);
+
+        return mapper.map(boardGameTypeRepository.saveAndFlush(boardGameType), BoardGameTypeReadDto.class);
     }
 
     private boolean validateCreateUpdate(Long id, BoardGameTypeCreateEditDto boardGameTypeDto) {
