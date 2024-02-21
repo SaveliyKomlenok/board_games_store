@@ -4,6 +4,7 @@ import by.saveliykomlenok.boardgamesstore.dto.order.OrderAccessoryReadDto;
 import by.saveliykomlenok.boardgamesstore.service.OrderAccessoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +22,7 @@ public class OrderAccessoryController {
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping("/{id}")
-    public List<OrderAccessoryReadDto> findAllById(@PathVariable("id") Long id){
-        return orderAccessoryService.findAllById(id);
+    public ResponseEntity<List<OrderAccessoryReadDto>> findAllById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(orderAccessoryService.findAllById(id));
     }
 }

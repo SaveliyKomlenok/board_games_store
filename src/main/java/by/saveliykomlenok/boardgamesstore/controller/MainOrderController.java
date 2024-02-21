@@ -6,6 +6,7 @@ import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.service.MainOrderService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -22,22 +23,23 @@ public class MainOrderController {
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping
-    public List<MainOrderReadDto> findAll(Principal principal){
+    public ResponseEntity<List<MainOrderReadDto>> findAll(Principal principal){
         User user = getCurrentUser(principal);
-        return mainOrderService.findAll(user);
+        return ResponseEntity.ok(mainOrderService.findAll(user));
     }
 
     @PreAuthorize("hasAnyAuthority('user:create')")
     @PostMapping
-    public MainOrderReadDto create(@RequestBody MainOrderCreateEditDto mainOrderDto, Principal principal){
+    public ResponseEntity<MainOrderReadDto> create(@RequestBody MainOrderCreateEditDto mainOrderDto, Principal principal){
         User user = getCurrentUser(principal);
-        return mainOrderService.create(user, mainOrderDto);
+        return ResponseEntity.ok(mainOrderService.create(user, mainOrderDto));
     }
 
     @PreAuthorize("hasAnyAuthority('user:delete')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id){
+    public ResponseEntity<String> delete(@PathVariable("id") Long id){
         mainOrderService.delete(id);
+        return ResponseEntity.ok("Order removed");
     }
 
     private User getCurrentUser(Principal principal){

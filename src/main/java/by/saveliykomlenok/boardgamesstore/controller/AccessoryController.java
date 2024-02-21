@@ -5,6 +5,7 @@ import by.saveliykomlenok.boardgamesstore.dto.accessory.AccessoryReadDto;
 import by.saveliykomlenok.boardgamesstore.service.AccessoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,30 +19,31 @@ public class AccessoryController {
     private final AccessoryService accessoryService;
 
     @GetMapping
-    public List<AccessoryReadDto> findAll(){
-        return accessoryService.findAll();
+    public ResponseEntity<List<AccessoryReadDto>> findAll(){
+        return ResponseEntity.ok(accessoryService.findAll());
     }
 
     @GetMapping("/{id}")
-    public AccessoryReadDto findById(@PathVariable("id") Long id){
-        return accessoryService.findById(id);
+    public ResponseEntity<AccessoryReadDto> findById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(accessoryService.findById(id));
     }
 
     @PreAuthorize("hasAnyAuthority('admin:create')")
     @PostMapping
-    public AccessoryReadDto create(@RequestBody AccessoryCreateEditDto accessoryDto){
-        return accessoryService.create(accessoryDto);
+    public ResponseEntity<AccessoryReadDto> create(@RequestBody AccessoryCreateEditDto accessoryDto){
+        return ResponseEntity.ok(accessoryService.create(accessoryDto));
     }
 
     @PreAuthorize("hasAnyAuthority('admin:update')")
     @PutMapping("/{id}")
-    public AccessoryReadDto update(@PathVariable("id") Long id, @RequestBody AccessoryCreateEditDto accessoryDto){
-        return accessoryService.update(id, accessoryDto);
+    public ResponseEntity<AccessoryReadDto> update(@PathVariable("id") Long id, @RequestBody AccessoryCreateEditDto accessoryDto){
+        return ResponseEntity.ok(accessoryService.update(id, accessoryDto));
     }
 
     @PreAuthorize("hasAnyAuthority('admin:delete')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id){
+    public ResponseEntity<String> delete(@PathVariable("id") Long id){
         accessoryService.delete(id);
+        return ResponseEntity.ok("Accessory removed");
     }
 }

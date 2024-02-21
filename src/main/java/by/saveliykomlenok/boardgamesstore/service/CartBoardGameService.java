@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class CartBoardGameService{
+public class CartBoardGameService {
     private final CartBoardGameRepository cartBoardGameRepository;
     private final BoardGameService boardGameService;
     private final ModelMapper mapper;

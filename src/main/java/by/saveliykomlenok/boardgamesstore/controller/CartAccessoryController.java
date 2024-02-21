@@ -6,6 +6,7 @@ import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.service.CartAccessoryService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -22,35 +23,36 @@ public class CartAccessoryController {
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping
-    public List<CartAccessoryReadDto> findAll(Principal principal) {
+    public ResponseEntity<List<CartAccessoryReadDto>> findAll(Principal principal) {
         User user = getCurrentUser(principal);
-        return cartAccessoryService.findAll(user);
+        return ResponseEntity.ok(cartAccessoryService.findAll(user));
     }
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping("/{id}")
-    public CartAccessoryReadDto findById(@PathVariable("id") Long id) {
-        return cartAccessoryService.findById(id);
+    public ResponseEntity<CartAccessoryReadDto> findById(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(cartAccessoryService.findById(id));
     }
 
     @PreAuthorize("hasAnyAuthority('user:create')")
     @PostMapping
-    public CartAccessoryReadDto create(@RequestBody CartAccessoryCreateEditDto cartAccessoryDto, Principal principal) {
+    public ResponseEntity<CartAccessoryReadDto> create(@RequestBody CartAccessoryCreateEditDto cartAccessoryDto, Principal principal) {
         User user = getCurrentUser(principal);
-        return cartAccessoryService.create(user, cartAccessoryDto);
+        return ResponseEntity.ok(cartAccessoryService.create(user, cartAccessoryDto));
     }
 
     @PreAuthorize("hasAnyAuthority('user:update')")
     @PutMapping("/{id}")
-    public CartAccessoryReadDto update(@PathVariable("id") Long id, @RequestBody CartAccessoryCreateEditDto cartAccessoryDto, Principal principal) {
+    public ResponseEntity<CartAccessoryReadDto> update(@PathVariable("id") Long id, @RequestBody CartAccessoryCreateEditDto cartAccessoryDto, Principal principal) {
         User user = getCurrentUser(principal);
-        return cartAccessoryService.update(user, id, cartAccessoryDto);
+        return ResponseEntity.ok(cartAccessoryService.update(user, id, cartAccessoryDto));
     }
 
     @PreAuthorize("hasAnyAuthority('user:delete')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id) {
+    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         cartAccessoryService.delete(id);
+        return ResponseEntity.ok("Cart accessory removed");
     }
 
     private User getCurrentUser(Principal principal) {

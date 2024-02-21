@@ -5,6 +5,7 @@ import by.saveliykomlenok.boardgamesstore.dto.user.UserReadDto;
 import by.saveliykomlenok.boardgamesstore.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,24 +20,25 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('admin:read')")
     @GetMapping
-    public List<UserReadDto> findAll(){
-        return userService.findAll();
+    public ResponseEntity<List<UserReadDto>> findAll(){
+        return ResponseEntity.ok(userService.findAll());
     }
 
     @PreAuthorize("hasAnyAuthority('admin:read')")
     @GetMapping("/{id}")
-    public UserReadDto findById(@PathVariable("id") Long id){
-        return userService.findById(id);
+    public ResponseEntity<UserReadDto> findById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(userService.findById(id));
     }
 
     @PutMapping("/{id}")
-    public UserReadDto update(@PathVariable("id") Long id, @RequestBody UserCreateEditDto userDto){
-        return userService.update(id, userDto);
+    public ResponseEntity<UserReadDto> update(@PathVariable("id") Long id, @RequestBody UserCreateEditDto userDto){
+        return ResponseEntity.ok(userService.update(id, userDto));
     }
 
     @PreAuthorize("hasAnyAuthority('admin:delete')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id){
+    public ResponseEntity<String> delete(@PathVariable("id") Long id){
         userService.delete(id);
+        return ResponseEntity.ok("User removed");
     }
 }

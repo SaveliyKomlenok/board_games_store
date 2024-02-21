@@ -6,6 +6,7 @@ import by.saveliykomlenok.boardgamesstore.entity.User;
 import by.saveliykomlenok.boardgamesstore.service.CartBoardGameService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -22,35 +23,36 @@ public class CardBoardGameController {
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping
-    public List<CartBoardGameReadDto> findAll(Principal principal){
+    public ResponseEntity<List<CartBoardGameReadDto>> findAll(Principal principal){
         User user = getCurrentUser(principal);
-        return cartBoardGameService.findAll(user);
+        return ResponseEntity.ok(cartBoardGameService.findAll(user));
     }
 
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping("/{id}")
-    public CartBoardGameReadDto findById(@PathVariable("id") Long id){
-        return cartBoardGameService.findById(id);
+    public ResponseEntity<CartBoardGameReadDto> findById(@PathVariable("id") Long id){
+        return ResponseEntity.ok(cartBoardGameService.findById(id));
     }
 
     @PreAuthorize("hasAnyAuthority('user:create')")
     @PostMapping
-    public CartBoardGameReadDto create(@RequestBody CartBoardGameCreateEditDto cartBoardGameDto, Principal principal){
+    public ResponseEntity<CartBoardGameReadDto> create(@RequestBody CartBoardGameCreateEditDto cartBoardGameDto, Principal principal){
         User user = getCurrentUser(principal);
-        return cartBoardGameService.create(user, cartBoardGameDto);
+        return ResponseEntity.ok(cartBoardGameService.create(user, cartBoardGameDto));
     }
 
     @PreAuthorize("hasAnyAuthority('user:update')")
     @PutMapping("/{id}")
-    public CartBoardGameReadDto update(@PathVariable("id") Long id, @RequestBody CartBoardGameCreateEditDto cartBoardGameDto, Principal principal){
+    public ResponseEntity<CartBoardGameReadDto> update(@PathVariable("id") Long id, @RequestBody CartBoardGameCreateEditDto cartBoardGameDto, Principal principal){
         User user = getCurrentUser(principal);
-        return cartBoardGameService.update(user, id, cartBoardGameDto);
+        return ResponseEntity.ok(cartBoardGameService.update(user, id, cartBoardGameDto));
     }
 
     @PreAuthorize("hasAnyAuthority('user:delete')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id){
+    public ResponseEntity<String> delete(@PathVariable("id") Long id){
         cartBoardGameService.delete(id);
+        return ResponseEntity.ok("Cart board game removed");
     }
 
     private User getCurrentUser(Principal principal){
