@@ -28,11 +28,8 @@ public class CartAccessoryService {
     private final UserService userService;
     private final ModelMapper mapper;
 
-    public List<CartAccessoryReadDto> findAll(Long id) {
-//        return cartAccessoryRepository.findAll().stream()
-//                .map(cartAccessories -> mapper.map(cartAccessories, CartAccessoryReadDto.class))
-//                .toList();
-        return cartAccessoryRepository.findCartAccessoriesByUserId(id).stream()
+    public List<CartAccessoryReadDto> findAll(User user) {
+        return cartAccessoryRepository.findCartAccessoriesByUserId(user.getId()).stream()
                 .map(cartAccessories -> mapper.map(cartAccessories, CartAccessoryReadDto.class))
                 .toList();
     }
@@ -48,8 +45,8 @@ public class CartAccessoryService {
         CartAccessories cartAccessories = Optional.of(cartAccessoryDto)
                 .map(cartAccessoryCreateEditDto -> mapper.map(cartAccessoryDto, CartAccessories.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        if (cartAccessoryRepository.existsCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), cartAccessoryDto.getUser())) {
-            cartAccessories = cartAccessoryRepository.findCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), cartAccessoryDto.getUser());
+        if (cartAccessoryRepository.existsCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), user.getId())) {
+            cartAccessories = cartAccessoryRepository.findCartAccessoriesByAccessoryIdAndUserId(cartAccessoryDto.getAccessory(), user.getId());
             cartAccessories.setAmount(cartAccessories.getAmount() + cartAccessoryDto.getAmount());
         }
 
@@ -60,10 +57,9 @@ public class CartAccessoryService {
         }
 
         cartAccessories.setAccessory(mapper.map(accessoryReadDto, Accessory.class));
-        cartAccessories.setUser(mapper.map(userService.findById(cartAccessoryDto.getUser()), User.class));
-        //cartAccessories.setUser(user); Реализовать после JWT
+        cartAccessories.setUser(user);
 
-        return mapper.map( cartAccessoryRepository.saveAndFlush(cartAccessories), CartAccessoryReadDto.class);
+        return mapper.map(cartAccessoryRepository.saveAndFlush(cartAccessories), CartAccessoryReadDto.class);
     }
 
     public boolean isEnoughAmount(AccessoryReadDto accessoryReadDto, CartAccessories cartAccessories) {
@@ -71,14 +67,14 @@ public class CartAccessoryService {
     }
 
     @Transactional
-    public CartAccessoryReadDto update(Long id, CartAccessoryCreateEditDto cartAccessoryDto) {
+    public CartAccessoryReadDto update(User user, Long id, CartAccessoryCreateEditDto cartAccessoryDto) {
         CartAccessories cartAccessories = cartAccessoryRepository.findById(id)
                 .orElseThrow(() -> new CartAccessoryMissingException("Card accessory doesn't exist"));
 
         mapper.map(cartAccessoryDto, cartAccessories);
 
         cartAccessories.setAccessory(mapper.map(accessoryService.findById(cartAccessoryDto.getAccessory()), Accessory.class));
-        cartAccessories.setUser(mapper.map(userService.findById(cartAccessoryDto.getUser()), User.class));
+        cartAccessories.setUser(user);
 
         return mapper.map(cartAccessoryRepository.saveAndFlush(cartAccessories), CartAccessoryReadDto.class);
     }

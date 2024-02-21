@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class CartAccessoryCreateEditDto {
     private int amount;
     private Long accessory;
-    private Long user;
 }

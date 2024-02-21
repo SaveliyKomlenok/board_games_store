@@ -27,7 +27,6 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class MainOrderService {
     private final MainOrderRepository mainOrderRepository;
-    private final UserService userService;
     private final CartBoardGameService cartBoardGameService;
     private final CartAccessoryService cartAccessoryService;
     private final OrderBoardGameService orderBoardGameService;
@@ -35,18 +34,9 @@ public class MainOrderService {
     private final ModelMapper mapper;
 
     public List<MainOrderReadDto> findAll(User user) {
-        return mainOrderRepository.findAll().stream()
+        return mainOrderRepository.findMainOrdersByUserId(user.getId()).stream()
                 .map(mainOrder -> mapper.map(mainOrder, MainOrderReadDto.class))
                 .toList();
-//        return mainOrderRepository.findMainOrdersByUserId(user.getId()).stream()
-//                .map(mainOrder -> mapper.map(mainOrder, MainOrderReadDto.class))
-//                .toList();
-    }
-
-    public MainOrderReadDto findById(Long id) {
-        return mainOrderRepository.findById(id)
-                .map(mainOrder -> mapper.map(mainOrder, MainOrderReadDto.class))
-                .orElseThrow(() -> new OrderMissingException("Order doesn't exist"));
     }
 
     @Transactional
@@ -54,8 +44,7 @@ public class MainOrderService {
         MainOrder mainOrder = Optional.of(mainOrderDto)
                 .map(mainOrderCreateEditDto -> mapper.map(mainOrderDto, MainOrder.class))
                 .orElseThrow();
-        mainOrder.setUser(mapper.map(userService.findById(mainOrderDto.getUser()), User.class));
-//        mainOrder.setUser(user);
+        mainOrder.setUser(user);
 
         MainOrder savedMainOrder = mainOrderRepository.save(mainOrder);
 
@@ -66,7 +55,7 @@ public class MainOrderService {
     }
 
     private void mapCartToOrderBoardGame(MainOrder mainOrder) {
-        for (CartBoardGameReadDto cartBoardGameReadDto : cartBoardGameService.findAll(mainOrder.getUser().getId())) {
+        for (CartBoardGameReadDto cartBoardGameReadDto : cartBoardGameService.findAll(mainOrder.getUser())) {
             OrderBoardGameCreateEditDto orderBoardGameDto = OrderBoardGameCreateEditDto.builder()
                     .amount(cartBoardGameReadDto.getAmount())
                     .boardGame(cartBoardGameReadDto.getBoardGame().getId())
@@ -78,7 +67,7 @@ public class MainOrderService {
     }
 
     private void mapCartToOrderAccessory(MainOrder mainOrder) {
-        for (CartAccessoryReadDto cartAccessoryReadDto : cartAccessoryService.findAll(mainOrder.getUser().getId())) {
+        for (CartAccessoryReadDto cartAccessoryReadDto : cartAccessoryService.findAll(mainOrder.getUser())) {
             OrderAccessoryCreateEditDto orderAccessoryDto = OrderAccessoryCreateEditDto.builder()
                     .amount(cartAccessoryReadDto.getAmount())
                     .accessory(cartAccessoryReadDto.getAccessory().getId())

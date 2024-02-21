@@ -25,14 +25,10 @@ import java.util.Optional;
 public class CartBoardGameService{
     private final CartBoardGameRepository cartBoardGameRepository;
     private final BoardGameService boardGameService;
-    private final UserService userService;
     private final ModelMapper mapper;
 
-    public List<CartBoardGameReadDto> findAll(Long id) {
-//        return cartBoardGameRepository.findAll().stream()
-//                .map(cartBoardGames -> mapper.map(cartBoardGames, CartBoardGameReadDto.class))
-//                .toList();
-        return cartBoardGameRepository.findCartBoardGamesByUserId(id).stream()
+    public List<CartBoardGameReadDto> findAll(User user) {
+        return cartBoardGameRepository.findCartBoardGamesByUserId(user.getId()).stream()
                 .map(cartBoardGames -> mapper.map(cartBoardGames, CartBoardGameReadDto.class))
                 .toList();
     }
@@ -48,8 +44,8 @@ public class CartBoardGameService{
         CartBoardGames cartBoardGames = Optional.of(cartBoardGameDto)
                 .map(cartBoardGameCreateEditDto -> mapper.map(cartBoardGameDto, CartBoardGames.class))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE));
-        if (cartBoardGameRepository.existsCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), cartBoardGameDto.getUser())) {
-            cartBoardGames = cartBoardGameRepository.findCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), cartBoardGameDto.getUser());
+        if (cartBoardGameRepository.existsCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), user.getId())) {
+            cartBoardGames = cartBoardGameRepository.findCartBoardGamesByBoardGameIdAndUserId(cartBoardGameDto.getBoardGame(), user.getId());
             cartBoardGames.setAmount(cartBoardGames.getAmount() + cartBoardGameDto.getAmount());
         }
 
@@ -60,8 +56,7 @@ public class CartBoardGameService{
         }
 
         cartBoardGames.setBoardGame(mapper.map(boardGameReadDto, BoardGame.class));
-        cartBoardGames.setUser(mapper.map(userService.findById(cartBoardGameDto.getUser()), User.class));
-        //cartBoardGames.setUser(user); Реализовать после JWT
+        cartBoardGames.setUser(user);
 
         return mapper.map(cartBoardGameRepository.saveAndFlush(cartBoardGames), CartBoardGameReadDto.class);
     }
@@ -71,14 +66,14 @@ public class CartBoardGameService{
     }
 
     @Transactional
-    public CartBoardGameReadDto update(Long id, CartBoardGameCreateEditDto cartBoardGameDto) {
+    public CartBoardGameReadDto update(User user, Long id, CartBoardGameCreateEditDto cartBoardGameDto) {
         CartBoardGames cartBoardGames = cartBoardGameRepository.findById(id)
                 .orElseThrow(() -> new CartBoardGameMissingException("Cart board game doesn't exist"));
 
         mapper.map(cartBoardGameDto, cartBoardGames);
 
         cartBoardGames.setBoardGame(mapper.map(boardGameService.findById(cartBoardGameDto.getBoardGame()), BoardGame.class));
-        cartBoardGames.setUser(mapper.map(userService.findById(cartBoardGameDto.getUser()), User.class));
+        cartBoardGames.setUser(user);
 
         return mapper.map(cartBoardGameRepository.saveAndFlush(cartBoardGames), CartBoardGameReadDto.class);
     }

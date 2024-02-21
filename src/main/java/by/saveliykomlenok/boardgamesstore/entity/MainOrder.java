@@ -33,4 +33,9 @@ public class MainOrder {
     @ManyToOne
     @JoinColumn(name = "user_obj")
     private User user;
+
+    @PrePersist
+    public void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class CartBoardGameCreateEditDto {
     private int amount;
     private Long boardGame;
-    private Long user;
 }

@@ -12,7 +12,5 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MainOrderCreateEditDto {
-    private LocalDateTime createdAt;
     private String address;
-    private Long user;
 }
